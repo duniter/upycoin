@@ -22,4 +22,4 @@ When you Universal Dividend is ready to be issue to your wallet, use this featur
 
 **History**
 
-Browse all your transactions you sent or received.
+Browse through all of your transactions you sent or received.
