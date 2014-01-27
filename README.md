@@ -23,3 +23,13 @@ When you Universal Dividend is ready to be issue to your wallet, use this featur
 **History**
 
 Browse through all of your transactions you sent or received.
+
+## Requirements
+
+Here are the python packages you should install in order to use uPyCoin:
+
+ * [ucoin](https://github.com/canercandan/ucoin-python-api)
+ * [python-gnupg](http://pythonhosted.org/python-gnupg/)
+ * [requests](http://python-requests.org/)
+ * [flask](flask.pocoo.org)
+
