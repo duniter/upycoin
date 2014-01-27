@@ -65,7 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--server', '-s', help='uCoin server to look data in', default='localhost')
     parser.add_argument('--port', '-p', help='uCoin server port', type=int, default=8081)
 
-    parser.add_argument('--config', '-c', help='set a config file', default='config.json')
+    parser.add_argument('--config', '-c', help='set a config file', default='config/config.json')
 
     subparsers = parser.add_subparsers(help='sub-command help')
 
