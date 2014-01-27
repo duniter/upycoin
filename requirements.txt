@@ -1,3 +1,4 @@
+ucoin
 python-gnupg
 requests
 flask
