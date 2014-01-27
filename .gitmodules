@@ -16,3 +16,6 @@
 [submodule "static/hogan"]
 	path = static/hogan
 	url = https://github.com/twitter/hogan.js
+[submodule "ucoin"]
+	path = ucoin
+	url = git@github.com:canercandan/ucoin-python-api.git
