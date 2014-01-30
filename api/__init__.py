@@ -32,34 +32,6 @@ from werkzeug.contrib.cache import SimpleCache
 
 logger = logging.getLogger("api")
 
-def format_amendment(am):
-    res = """\
-Version\t\t\t%(version)s
-Currency\t\t%(currency)s
-Number\t\t\t%(number)s
-GeneratedOn\t\t%(generated)s
-UniversalDividend\t%(dividend)s
-NextRequiredVotes\t%(nextVotes)s
-PreviousHash\t\t%(previousHash)s
-MembersRoot\t\t%(membersRoot)s
-MembersCount\t\t%(membersCount)s
-""" % am
-
-    if am['membersChanges']:
-        res += 'MembersChanges\n'
-        for x in am['membersChanges']: res += '%s\n' % x
-
-    res += """\
-VotersRoot\t\t%(votersRoot)s
-VotersCount\t\t%(votersCount)s
-""" % am
-
-    if am['votersChanges']:
-        res += 'VotersChanges\n'
-        for x in am['votersChanges']: res += '%s\n' % x
-
-    return res
-
 def render_prettyprint(template_name, result):
     s = StringIO()
     pprint(result, s)
