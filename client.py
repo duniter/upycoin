@@ -18,9 +18,12 @@
 #
 
 from pprint import pprint
-import ucoin, json, logging, argparse, sys, gnupg, hashlib, re, datetime as dt
+import\
+    ucoin, json, logging, argparse, sys,\
+    gnupg, hashlib, re, datetime as dt,\
+    core
 from collections import OrderedDict
-from merkle import Merkle
+from core.merkle import Merkle
 
 logger = logging.getLogger("cli")
 

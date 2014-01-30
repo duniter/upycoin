@@ -21,9 +21,8 @@ from pprint import pprint
 import\
     ucoin, json, logging, argparse, sys,\
     gnupg, hashlib, re, datetime as dt,\
-    webbrowser, math
+    webbrowser, math, core
 from collections import OrderedDict
-from merkle import Merkle
 from flask import\
     Flask, request, render_template,\
     jsonify, redirect, abort, url_for,\

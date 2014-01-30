@@ -23,7 +23,6 @@ import\
     gnupg, hashlib, re, datetime as dt,\
     webbrowser, math
 from collections import OrderedDict
-from merkle import Merkle
 from flask import\
     Flask, request, render_template,\
     jsonify, redirect, abort, url_for,\
