@@ -2,7 +2,9 @@
 
 uPyCoin is a webclient in order to manage your wallet based on uCoin.
 
-## Requirements
+## Installation
+
+### Requirements
 
 uPyCoin uses Python 3 so if it is not yet installed on your distribution do it and in addition you have to install pip in order to do the following steps.
 
@@ -19,8 +21,6 @@ $ sudo pip3 install python-gnupg
 $ sudo pip3 install requests
 $ sudo pip3 install flask
 ```
-
-## Installation
 
 ### Submodules
 
