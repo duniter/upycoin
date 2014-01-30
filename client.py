@@ -27,10 +27,6 @@ from core.merkle import Merkle
 
 logger = logging.getLogger("cli")
 
-# def action_transactions():
-#     for tx in ucoin.hdc.transactions.All().get():
-#         print(tx['hash'])
-
 def print_amendment(am):
     print("""\
 Version\t\t\t%(version)s
