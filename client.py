@@ -120,215 +120,43 @@ def index():
 def issue():
     logger.debug('issue')
 
-    try:
-        last_tx = ucoin.hdc.transactions.sender.Last(ucoin.settings['fingerprint']).get()
-    except ValueError:
-        last_tx = None
+    issue = ucoin.wrappers.Issue(ucoin.settings['fingerprint'],
+                                 ucoin.settings['amendment'],
+                                 ucoin.settings['coins'],
+                                 ucoin.settings['message'])
 
-    try:
-        last_issuance = ucoin.hdc.transactions.sender.issuance.Last(ucoin.settings['fingerprint']).get()
-    except ValueError:
-        last_issuance = None
-
-    __dict = {}
-    __dict.update(ucoin.settings)
-    __dict['version'] = 1
-    __dict['number'] = 0 if not last_tx else last_tx['transaction']['number']+1
-    __dict['previousHash'] = hashlib.sha1(("%(raw)s%(signature)s" % last_tx).encode('ascii')).hexdigest().upper() if last_tx else None
-    __dict['type'] = 'ISSUANCE'
-
-    # pprint(__dict)
-
-    tx = """\
-Version: %(version)d
-Currency: %(currency)s
-Sender: %(fingerprint)s
-Number: %(number)d
-""" % __dict
-
-    if last_tx: tx += "PreviousHash: %(previousHash)s\n" % __dict
-
-    tx += """\
-Recipient: %(fingerprint)s
-Type: %(type)s
-Coins:
-""" % __dict
-
-    def get_next_coin_number(coins):
-        number = 0
-        for c in coins:
-            candidate = int(c['id'].split('-')[1])
-            if candidate > number: number = candidate
-        return number+1
-
-    previous_idx = 0 if not last_issuance else get_next_coin_number(last_issuance['transaction']['coins'])
-
-    for idx, coin in enumerate(ucoin.settings['coins']):
-        __dict['idx'] = idx+previous_idx
-        __dict['base'], __dict['power'] = [int(x) for x in coin.split(',')]
-        tx += '%(fingerprint)s-%(idx)d-%(base)d-%(power)d-A-%(amendment)d\n' % __dict
-
-    tx += """\
-Comment:
-%(message)s
-""" % __dict
-
-    tx = tx.replace("\n", "\r\n")
-    txs = ucoin.settings['gpg'].sign(tx, detach=True, keyid=ucoin.settings['user'])
-
-    try:
-        ucoin.hdc.transactions.Process().post(transaction=tx, signature=txs)
-    except ValueError as e:
-        print(e)
+    if not issue():
+        print(issue.get_error())
     else:
         print('Posted issuance transaction')
 
 def transfer():
     logger.debug('transfer')
     logger.debug('recipient: %s' % ucoin.settings['recipient'])
-
     if not ucoin.settings['coins']: ucoin.settings['coins'] = input()
-
     logger.debug('coins: %s' % ucoin.settings['coins'])
 
-    try:
-        last_tx = ucoin.hdc.transactions.sender.Last(ucoin.settings['fingerprint']).get()
-    except ValueError:
-        last_tx = None
+    transfer = ucoin.wrappers.Transfer(ucoin.settings['fingerprint'],
+                                       ucoin.settings['recipient'],
+                                       ucoin.settings['coins'],
+                                       ucoin.settings['message'])
 
-    __dict = {}
-    __dict.update(ucoin.settings)
-    __dict['version'] = 1
-    __dict['number'] = 0 if not last_tx else last_tx['transaction']['number']+1
-    __dict['previousHash'] = hashlib.sha1(("%(raw)s%(signature)s" % last_tx).encode('ascii')).hexdigest().upper()
-    __dict['type'] = 'TRANSFER'
-
-    # pprint(__dict)
-
-    tx = """\
-Version: %(version)d
-Currency: %(currency)s
-Sender: %(fingerprint)s
-Number: %(number)d
-""" % __dict
-
-    if last_tx: tx += "PreviousHash: %(previousHash)s\n" % __dict
-
-    tx += """\
-Recipient: %(recipient)s
-Type: %(type)s
-Coins:
-""" % __dict
-
-    for coin in ucoin.settings['coins'].split(','):
-        data = coin.split(':')
-        issuer = data[0]
-        for number in data[1:]:
-            __dict.update(ucoin.hdc.coins.View(issuer, int(number)).get())
-            tx += '%(id)s, %(transaction)s\n' % __dict
-
-    tx += """\
-Comment:
-%(message)s
-""" % __dict
-
-    tx = tx.replace("\n", "\r\n")
-    txs = ucoin.settings['gpg'].sign(tx, detach=True, keyid=ucoin.settings['user'])
-
-    try:
-        ucoin.hdc.transactions.Process().post(transaction=tx, signature=txs)
-    except ValueError as e:
-        print(e)
+    if not transfer():
+        print(transfer.get_error())
     else:
         print('Posted transfer transaction')
 
 def fusion():
     logger.debug('fusion')
-
     if not ucoin.settings['coins']: ucoin.settings['coins'] = input()
-
     logger.debug('coins: %s' % ucoin.settings['coins'])
 
-    try:
-        last_tx = ucoin.hdc.transactions.sender.Last(ucoin.settings['fingerprint']).get()
-    except ValueError:
-        last_tx = None
+    fusion = ucoin.wrappers.Fusion(ucoin.settings['fingerprint'],
+                                   ucoin.settings['coins'],
+                                   ucoin.settings['message'])
 
-    try:
-        last_issuance = ucoin.hdc.transactions.sender.issuance.Last(ucoin.settings['fingerprint']).get()
-    except ValueError:
-        last_issuance = None
-
-    __dict = {}
-    __dict.update(ucoin.settings)
-    __dict['version'] = 1
-    __dict['number'] = 0 if not last_tx else last_tx['transaction']['number']+1
-    __dict['previousHash'] = hashlib.sha1(("%(raw)s%(signature)s" % last_tx).encode('ascii')).hexdigest().upper()
-    __dict['type'] = 'FUSION'
-
-    # pprint(__dict)
-
-    tx = """\
-Version: %(version)d
-Currency: %(currency)s
-Sender: %(fingerprint)s
-Number: %(number)d
-""" % __dict
-
-    if last_tx: tx += "PreviousHash: %(previousHash)s\n" % __dict
-
-    tx += """\
-Recipient: %(fingerprint)s
-Type: %(type)s
-Coins:
-""" % __dict
-
-    coins = []
-    for coin in ucoin.settings['coins'].split(','):
-        data = coin.split(':')
-        issuer = data[0]
-        for number in data[1:]:
-            coins.append(ucoin.hdc.coins.View(issuer, int(number)).get())
-
-    __sum = 0
-    for coin in coins:
-        base, power = coin['id'].split('-')[2:4]
-        __sum += int(base) * 10**int(power)
-
-    m = re.match(r'^(\d)(0*)$', str(__sum))
-
-    if not m:
-        print('bad sum value %d' % __sum)
-        return
-
-    def get_next_coin_number(coins):
-        number = 0
-        for c in coins:
-            candidate = int(c['id'].split('-')[1])
-            if candidate > number: number = candidate
-        return number+1
-
-    __dict['idx'] = 0 if not last_issuance else get_next_coin_number(last_issuance['transaction']['coins'])
-
-    __dict['base'], __dict['power'] = int(m.groups()[0]), len(m.groups()[1])
-    tx += '%(fingerprint)s-%(idx)d-%(base)d-%(power)d-F-%(number)d\n' % __dict
-
-    for coin in coins:
-        __dict.update(coin)
-        tx += '%(id)s, %(transaction)s\n' % __dict
-
-    tx += """\
-Comment:
-%(message)s
-""" % __dict
-
-    tx = tx.replace("\n", "\r\n")
-    txs = ucoin.settings['gpg'].sign(tx, detach=True, keyid=ucoin.settings['user'])
-
-    try:
-        ucoin.hdc.transactions.Process().post(transaction=tx, signature=txs)
-    except ValueError as e:
-        print(e)
+    if not fusion():
+        print(fusion.get_error())
     else:
         print('Posted fusion transaction')
 
@@ -518,18 +346,8 @@ def clist():
     if ucoin.settings['limit']:
         logger.debug('limit: %d' % ucoin.settings['limit'])
 
-    __list = ucoin.hdc.coins.List(ucoin.settings['fingerprint']).get()
-
-    coins = []
-    __sum = 0
-    for c in __list['coins']:
-        for id in c['ids']:
-            n,b,p,t,i = id.split('-')
-            amount = int(b) * 10**int(p)
-            __dict = {'issuer': c['issuer'], 'number': int(n), 'base': int(b), 'power': int(p), 'type': t, 'type_number': int(i), 'amount': amount}
-            if not ucoin.settings['limit'] or ucoin.settings['limit'] >= amount:
-                coins.append(__dict)
-                __sum += amount
+    __sum, coins = ucoin.wrappers.CoinsList(ucoin.settings['fingerprint'],
+                                            ucoin.settings.get('limit', None))()
 
     print('Credit: %d\n-------------------\n' % __sum)
     print('Value\tIssuer\t\t\t\t\t\t#\n')
@@ -540,31 +358,13 @@ def cget():
     logger.debug('cget')
     logger.debug('value: %s' % ucoin.settings['value'])
 
-    __list = ucoin.hdc.coins.List(ucoin.settings['fingerprint']).get()
-
-    coins = {}
-    for c in __list['coins']:
-        for id in c['ids']:
-            n,b,p,t,i = id.split('-')
-            amount = int(b) * 10**int(p)
-            coins[amount] = {'issuer': c['issuer'], 'number': int(n), 'base': int(b), 'power': int(p), 'type': t, 'type_number': int(i), 'amount': amount}
-
-    issuers = {}
-    for v in ucoin.settings['value']:
-        if v in coins:
-            c = coins[v]
-            issuers[c['issuer']] = issuers.get(c['issuer']) or []
-            issuers[c['issuer']].append(c)
-        else:
-            print('You do not have enough coins of value (%d)' % v)
-            return
-
-    for i, issuer in enumerate(issuers):
-        if i > 0: print(',', end='')
-        print(issuer, end='')
-        for c in issuers[issuer]:
-            print(':%(number)d' % c, end='')
-    print()
+    try:
+        coins = ucoin.wrappers.CoinsGet(ucoin.settings['fingerprint'],
+                                        ucoin.settings['value'])()
+    except ValueError as e:
+        print(e)
+    else:
+        print(coins)
 
 def send_pubkey():
     logger.debug('send_pubkey')
