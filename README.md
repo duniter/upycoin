@@ -55,7 +55,7 @@ Once all the previous steps were done, you are then ready to launch the webclien
 $ ./webclient.py -i run
 ```
 
-From your favorite browser, open the URL http://localhost:5000 and have fun!
+From your favorite browser, open the URL [http://localhost:5000](http://localhost:5000) and have fun!
 
 ## How does it works ?
 
