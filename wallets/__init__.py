@@ -33,28 +33,6 @@ from werkzeug.contrib.cache import SimpleCache
 
 logger = logging.getLogger("wallets")
 
-def get_sender_transactions(pgp_fingerprint, cache=None):
-    k = 'sender_transactions_%s' % pgp_fingerprint
-    rv = cache.get(k)
-    if rv is None:
-        rv = list(ucoin.hdc.transactions.Sender(pgp_fingerprint).get())
-        __dict = {}
-        for item in rv: __dict[item['value']['transaction']['number']] = item['value']['transaction']
-        rv = __dict
-        cache.set(k, rv, timeout=5*60)
-    return rv
-
-def get_recipient_transactions(pgp_fingerprint, cache=None):
-    k = 'recipient_transactions_%s' % pgp_fingerprint
-    rv = cache.get(k)
-    if rv is None:
-        rv = list(ucoin.hdc.transactions.Recipient(pgp_fingerprint).get())
-        __dict = {}
-        for item in rv: __dict[item['value']['transaction']['number']] = item['value']['transaction']
-        rv = __dict
-        cache.set(k, rv, timeout=5*60)
-    return rv
-
 def compute_dividend_remainders(pgp_fingerprint):
     remainders = {}
     for am in ucoin.hdc.amendments.List().get():
@@ -82,6 +60,10 @@ def register(app, cache=None):
         fpr, number, base, power, origin, origin_number = coin.split('-')
         return int(base)*10**int(power)
 
+    @app.template_filter('timestamp2date')
+    def timestamp2date_filter(timestamp, format='%d-%m-%Y %H:%M:%S'):
+        return dt.datetime.fromtimestamp(timestamp).strftime(format)
+
     @app.route('/')
     @app.route('/wallets')
     def wallets():
@@ -97,17 +79,25 @@ def register(app, cache=None):
         newkey = ucoin.settings['gpg'].gen_key(__input)
         return jsonify(result="Your new key (%s) has been successfully created." % newkey.fingerprint)
 
+    def get_transactions(pgp_fingerprint, fct, key_prefix):
+        k = '%s_transactions_%s' % (key_prefix, pgp_fingerprint)
+        v = cache.get(k)
+        if v is None:
+            v = [item['value']['transaction'] for item in fct(pgp_fingerprint).get()]
+            cache.set(k, v, timeout=5*60)
+        return v
+
     @app.route('/wallets/<pgp_fingerprint>/history')
     @app.route('/wallets/<pgp_fingerprint>/history/<type>')
     def wallet_history(pgp_fingerprint, type='all'):
-        sender = get_sender_transactions(pgp_fingerprint, cache)
-        recipient = get_recipient_transactions(pgp_fingerprint, cache)
+        recipient = get_transactions(pgp_fingerprint, ucoin.hdc.transactions.Recipient, 'recipient')
+        sender = get_transactions(pgp_fingerprint, ucoin.hdc.transactions.Sender, 'sender')
 
         return render_template('wallets/history.html',
                                settings=ucoin.settings,
                                key=ucoin.settings['secret_keys'].get(pgp_fingerprint),
-                               sender=sender,
                                recipient=recipient,
+                               sender=sender,
                                type=type,
                                clist=ucoin.wrappers.CoinsList(pgp_fingerprint)())
 

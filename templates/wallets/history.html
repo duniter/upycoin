@@ -38,48 +38,50 @@
   <table class="table table-bordered table-hover">
     <thead>
       <tr>
-	<th class="col-md-1 text-left">#</th>
 	<th class="col-md-2 text-center">{{"Sender" if label == "Received" else "Recipient" }}</th>
-	<th class="col-md-8 text-center">Comment</th>
+	<th class="col-md-7 text-center">Comment</th>
 	<th class="col-md-1 text-center">Amount</th>
+	<th class="col-md-2 text-center">Date</th>
       </tr>
     </thead>
     <tbody>
-      {% for number, tx in data.items()|reverse -%}
-	{# {% with tx=r.value.transaction -%} #}
-	  {% if type == "all" or tx.type|lower == type|lower -%}
-	    <tr class="row1 {% if tx.type == 'TRANSFER' %}active{% elif tx.type == 'ISSUANCE' %}success{% elif tx.type == 'FUSION' %}warning{% else %}danger{% endif %}">
-	      <td>{{tx.number}}</td>
+      {% for tx in data|sort(attribute='sigDate')|reverse -%}
+	{% if type == "all" or tx.type|lower == type|lower -%}
+	  <tr class="row1 {% if tx.type == 'TRANSFER' %}active{% elif tx.type == 'ISSUANCE' %}success{% elif tx.type == 'FUSION' %}warning{% else %}danger{% endif %}">
 
-	      <td>
-		{% with reference=tx.sender if label == "Received" else tx.recipient -%}
-		  {% with name=settings.public_keys[reference].uids.0 if settings.public_keys[reference] else "", keyid=reference[-8:] -%}
-		    <a class="tooltip_link" title="{{name}} ({{keyid}})">
-		      {% if reference == key.fingerprint -%}
-			<span class="label label-default">me</span>
-		      {% else -%}
-			<span class="label label-info">{{name|truncate(25) if name else keyid}}</span>
-		      {% endif -%}
-		    </a>
-		  {% endwith -%}
+	    <td>
+	      {% with reference=tx.sender if label == "Received" else tx.recipient -%}
+		{% with name=settings.public_keys[reference].uids.0 if settings.public_keys[reference] else "", keyid=reference[-8:] -%}
+		  <a class="tooltip_link" title="{{name}} ({{keyid}})">
+		    {% if reference == key.fingerprint -%}
+		      <span class="label label-default">me</span>
+		    {% else -%}
+		      <span class="label label-info">{{name|truncate(25) if name else keyid}}</span>
+		    {% endif -%}
+		  </a>
 		{% endwith -%}
-	      </td>
+	      {% endwith -%}
+	    </td>
 
-	      <td>
-		<span class="label label-{% if tx.type == 'TRANSFER' %}info{% elif tx.type == 'ISSUANCE' %}success{% elif tx.type == 'FUSION' %}warning{% else %}danger{% endif %}">{{tx.type|title}}</span>
-		<a class="tooltip_link" title="{{tx.comment|trim}}">{{tx.comment|trim|truncate(150)}}</a>
-	      </td>
+	    <td>
+	      <span class="label label-{% if tx.type == 'TRANSFER' %}info{% elif tx.type == 'ISSUANCE' %}success{% elif tx.type == 'FUSION' %}warning{% else %}danger{% endif %}">{{tx.type|title}}</span>
+	      <a class="tooltip_link" title="{{tx.comment|trim}}">{{tx.comment|trim|truncate(150)}}</a>
+	    </td>
 
-	      <td class="text-right">
-		{% with coins=tx.coins|map(attribute="id")|map("compute_coin")|list -%}
-		  <span class="badge alert-{{'success' if label == 'Received' else 'danger'}} tooltip_link" title="{{coins|join(' + ')}}">
-		    {{coins|sum}}
-		  </span>
-		{% endwith -%}
-	      </td>
-	    </tr>
-	  {% endif -%}
-	{# {% endwith -%} #}
+	    <td class="text-right">
+	      {% with coins=tx.coins|map(attribute="id")|map("compute_coin")|list -%}
+		<span class="badge alert-{{'success' if label == 'Received' else 'danger'}} tooltip_link" title="{{coins|join(' + ')}}">
+		  {{coins|sum}}
+		</span>
+	      {% endwith -%}
+	    </td>
+
+	    <td class="text-right">
+	      <a href="#" class="tooltip_link" title="{{tx.sigDate|timestamp2date}}">{{tx.sigDate|timestamp2date(format="%d-%m-%Y")}}
+	    </td>
+
+	  </tr>
+	{% endif -%}
       {% endfor -%}
     </tbody>
   </table>
