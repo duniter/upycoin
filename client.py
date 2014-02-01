@@ -120,10 +120,10 @@ def index():
 def issue():
     logger.debug('issue')
 
-    issue = ucoin.wrappers.Issue(ucoin.settings['fingerprint'],
-                                 ucoin.settings['amendment'],
-                                 ucoin.settings['coins'],
-                                 ucoin.settings['message'])
+    issue = ucoin.wrappers.transactions.Issue(ucoin.settings['fingerprint'],
+                                              ucoin.settings['amendment'],
+                                              ucoin.settings['coins'],
+                                              ucoin.settings['message'])
 
     if not issue():
         print(issue.get_error())
@@ -136,10 +136,10 @@ def transfer():
     if not ucoin.settings['coins']: ucoin.settings['coins'] = input()
     logger.debug('coins: %s' % ucoin.settings['coins'])
 
-    transfer = ucoin.wrappers.Transfer(ucoin.settings['fingerprint'],
-                                       ucoin.settings['recipient'],
-                                       ucoin.settings['coins'],
-                                       ucoin.settings['message'])
+    transfer = ucoin.wrappers.transactions.Transfer(ucoin.settings['fingerprint'],
+                                                    ucoin.settings['recipient'],
+                                                    ucoin.settings['coins'],
+                                                    ucoin.settings['message'])
 
     if not transfer():
         print(transfer.get_error())
@@ -151,9 +151,9 @@ def fusion():
     if not ucoin.settings['coins']: ucoin.settings['coins'] = input()
     logger.debug('coins: %s' % ucoin.settings['coins'])
 
-    fusion = ucoin.wrappers.Fusion(ucoin.settings['fingerprint'],
-                                   ucoin.settings['coins'],
-                                   ucoin.settings['message'])
+    fusion = ucoin.wrappers.transactions.Fusion(ucoin.settings['fingerprint'],
+                                                ucoin.settings['coins'],
+                                                ucoin.settings['message'])
 
     if not fusion():
         print(fusion.get_error())
@@ -346,8 +346,8 @@ def clist():
     if ucoin.settings['limit']:
         logger.debug('limit: %d' % ucoin.settings['limit'])
 
-    __sum, coins = ucoin.wrappers.CoinsList(ucoin.settings['fingerprint'],
-                                            ucoin.settings.get('limit', None))()
+    __sum, coins = ucoin.wrappers.coins.List(ucoin.settings['fingerprint'],
+                                             ucoin.settings.get('limit', None))()
 
     print('Credit: %d\n-------------------\n' % __sum)
     print('Value\tIssuer\t\t\t\t\t\t#\n')
@@ -359,8 +359,8 @@ def cget():
     logger.debug('value: %s' % ucoin.settings['value'])
 
     try:
-        coins = ucoin.wrappers.CoinsGet(ucoin.settings['fingerprint'],
-                                        ucoin.settings['value'])()
+        coins = ucoin.wrappers.coins.Get(ucoin.settings['fingerprint'],
+                                         ucoin.settings['value'])()
     except ValueError as e:
         print(e)
     else:
