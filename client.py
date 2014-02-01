@@ -160,6 +160,21 @@ def fusion():
     else:
         print('Posted fusion transaction')
 
+def divide():
+    logger.debug('divide')
+    if not ucoin.settings['old_coins']: ucoin.settings['old_coins'] = input()
+    logger.debug('old_coins: %s' % ucoin.settings['old_coins'])
+
+    divide = ucoin.wrappers.transactions.Divide(ucoin.settings['fingerprint'],
+                                                ucoin.settings['old_coins'],
+                                                ucoin.settings['new_coins'],
+                                                ucoin.settings['message'])
+
+    if not divide():
+        print(divide.get_error())
+    else:
+        print('Posted divide transaction')
+
 def host_add():
     logger.debug('host_add')
 
@@ -459,6 +474,12 @@ if __name__ == '__main__':
     sp.add_argument('coins', nargs='?', help='coins to fusion [coin,...]. If no value has passed, it will be read from STDIN.')
     sp.add_argument('--message', '-m', help='write a comment', default='')
     sp.set_defaults(func=fusion)
+
+    sp = subparsers.add_parser('divide', help='Divide coins to make other coins (coins a read from STDIN)', **common_options)
+    sp.add_argument('old_coins', nargs='?', help='old coins to divide [coin,...]. If no value has passed, it will be read from STDIN.')
+    sp.add_argument('new_coins', nargs='+', help='new coins to create [coin_value,number_of_zero_behind].')
+    sp.add_argument('--message', '-m', help='write a comment', default='')
+    sp.set_defaults(func=divide)
 
     sp = subparsers.add_parser('host-add', help='Add given key fingerprint to hosts managing transactions of key -u', **common_options)
     sp.add_argument('key', help='key fingerprint')
