@@ -152,7 +152,7 @@ def history(pgp_fingerprint, type='all', page=1):
                            sender=sender[begin:end],
                            pagination=pagination,
                            type=type, page=page,
-                           clist=ucoin.wrappers.CoinsList(pgp_fingerprint)())
+                           clist=ucoin.wrappers.coins.List(pgp_fingerprint)())
 
 @bp.route('/<pgp_fingerprint>/history/refresh')
 @bp.route('/<pgp_fingerprint>/history/refresh/<type>')
@@ -166,7 +166,7 @@ def history_refresh(pgp_fingerprint, type='all', page=1):
 
 @bp.route('/<pgp_fingerprint>/transfer', methods=['GET', 'POST'])
 def transfer(pgp_fingerprint):
-    balance, __clist = ucoin.wrappers.CoinsList(pgp_fingerprint)()
+    balance, __clist = ucoin.wrappers.coins.List(pgp_fingerprint)()
 
     if request.method == 'GET':
         return render_template('wallets/transfer.html',
@@ -202,9 +202,9 @@ def transfer(pgp_fingerprint):
         flash('this amount cannot be reached with existing coins in your wallet.', 'error')
         return redirect(url_for('.transfer', pgp_fingerprint=pgp_fingerprint))
 
-    coins = ucoin.wrappers.CoinsGet(pgp_fingerprint, coins)()
+    coins = ucoin.wrappers.coins.Get(pgp_fingerprint, coins)()
 
-    transfer = ucoin.wrappers.Transfer(pgp_fingerprint, recipient, coins, message)
+    transfer = ucoin.wrappers.transactions.Transfer(pgp_fingerprint, recipient, coins, message)
 
     if not transfer():
         flash(u'Transfer error', 'error')
@@ -288,10 +288,10 @@ def issuance(pgp_fingerprint):
                     issuance.append('%d,%d' % (coin/10**power, power))
 
     for am, coins in issuances.items():
-        issue = ucoin.wrappers.Issue(pgp_fingerprint, am, coins)
+        issue = ucoin.wrappers.transactions.Issue(pgp_fingerprint, am, coins)
         if not issue():
             flash(u'Issuance error', 'error')
-            break
+            return redirect(url_for('.issuance', pgp_fingerprint=pgp_fingerprint))
 
     flash('The issuance was completed.', 'success')
     cache.set(k, None)
