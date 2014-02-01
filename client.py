@@ -476,7 +476,7 @@ if __name__ == '__main__':
     sp.set_defaults(func=fusion)
 
     sp = subparsers.add_parser('divide', help='Divide coins to make other coins (coins a read from STDIN)', **common_options)
-    sp.add_argument('old_coins', nargs='?', help='old coins to divide [coin,...]. If no value has passed, it will be read from STDIN.')
+    sp.add_argument('--old_coins', '-o', help='old coins to divide [coin,...]. If no value has passed, it will be read from STDIN.', default='')
     sp.add_argument('new_coins', nargs='+', help='new coins to create [coin_value,number_of_zero_behind].')
     sp.add_argument('--message', '-m', help='write a comment', default='')
     sp.set_defaults(func=divide)
