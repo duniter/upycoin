@@ -20,7 +20,7 @@
   {% endwith -%}
 </div>
 
-<form role="form" method="post" action="{{ url_for('wallet_transfer', pgp_fingerprint=key.fingerprint) }}">
+<form role="form" method="post" action="{{ url_for('.transfer', pgp_fingerprint=key.fingerprint) }}">
   <div class="panel panel-success">
     <div class="panel-heading"><h4>Recipient</h4></div>
     <div class="panel-body">
@@ -58,7 +58,7 @@
     $(function() {
         $('.typeahead').typeahead({
             name: 'recipient',
-            prefetch: '{{ url_for('wallet_public_keys') }}',
+            prefetch: '{{ url_for('.public_keys') }}',
             template: [
     	        {% raw -%}
     	        '<p class="key-name">{{name}}</p>',

@@ -42,8 +42,8 @@
       $('body').ready(function () {
         var urlMenu = {
           '/': 'wallets',
-          '{{ url_for('wallets') }}': 'wallets',
-          '{{ url_for('api') }}': 'api',
+          '{{ url_for('wallets.home') }}': 'wallets',
+          '{{ url_for('api.home') }}': 'api',
         };
 
         var matches = window.location.pathname.match(/^(\/[^\/]*)/g);

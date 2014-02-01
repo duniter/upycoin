@@ -12,8 +12,8 @@
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-	<li id="wallets"><a href="{{ url_for('wallets') }}"><i class="glyphicon glyphicon-briefcase"></i> Wallets</a></li>
-	<li id="api"><a href="{{ url_for('api') }}"><i class="glyphicon glyphicon-cog"></i> API</a></li>
+	<li id="wallets"><a href="{{ url_for('wallets.home') }}"><i class="glyphicon glyphicon-briefcase"></i> Wallets</a></li>
+	<li id="api"><a href="{{ url_for('api.home') }}"><i class="glyphicon glyphicon-cog"></i> API</a></li>
       </ul>
       <h4 class="navbar-text pull-right">
 	{% if auth %}

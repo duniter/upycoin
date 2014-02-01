@@ -13,7 +13,7 @@
     <a class="btn btn-primary btn-lg btn-block tooltip_link" id="random" title="Click here in order to balance the set of coins values"><strong>Suggest</strong></a>
   </div>
 
-  <form role="form" method="post" action="{{ url_for('wallet_issuance', pgp_fingerprint=key.fingerprint) }}">
+  <form role="form" method="post" action="{{ url_for('.issuance', pgp_fingerprint=key.fingerprint) }}">
 
     <div id="sliders">
       <input id="available_total" type="hidden" value="{{remainder}}" />

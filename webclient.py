@@ -33,14 +33,18 @@ import api, wallets
 
 logger = logging.getLogger("cli")
 
+app = Flask(__name__)
+app.secret_key = 'some_secret'
+cache = SimpleCache()
+
+app.register_blueprint(api.bp, url_prefix='/api')
+app.register_blueprint(wallets.bp, url_prefix='/wallets')
+
+@app.route('/')
+def home():
+    return redirect(url_for('wallets.home'))
+
 if __name__ == '__main__':
-    app = Flask(__name__)
-    app.secret_key = 'some_secret'
-    cache = SimpleCache()
-
-    api.register(app)
-    wallets.register(app, cache)
-
     common_options = {'formatter_class': argparse.ArgumentDefaultsHelpFormatter}
 
     parser = argparse.ArgumentParser(description='uCoin webclient.', **common_options)

@@ -87,7 +87,7 @@
 		return false;
 	    }
 
-	    $.getJSON($SCRIPT_ROOT + "{{ url_for('new_wallet_create') }}", {
+	    $.getJSON($SCRIPT_ROOT + "{{ url_for('.new_create') }}", {
 		type: type.val(),
 		length: length.val(),
 		email: email.val(),
