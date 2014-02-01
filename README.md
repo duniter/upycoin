@@ -1,4 +1,4 @@
-# uPyCoin (version 0.2)
+# uPyCoin
 
 uPyCoin is a webclient in order to manage your wallet based on uCoin.
 
@@ -78,22 +78,3 @@ When your Universal Dividend is ready to be issued to your wallet, use this feat
 **History**
 
 Browse through all of your transactions you sent or received.
-
-## Change Logs
-
-### 0.2
-
-* replaced slidebar from transfer page by a basic text input controler since the computation complexity to get all combinations coins was too high, you can easily set the amount want to send.
-* created the issuance page in order to issue your own available UD thanks to nice slidebars and a random selection of coins.
-* divided both the projects ucoin-python-api and upycoin since their goals are differents.
-* since the code was refactorized in ucoin-python-api use of the new design in webclient.py and client.py
-* fixed a few bugs
-* better explanations in README
-
-### 0.1
-
-* initialization of the project based on flask
-* created a basic interface in order to browse through your wallets
-* history page to see the transactions history for several types of transactions
-* transfer page make a transfer to another account using its pgp fingerprint, a nice slidebar to select between several combinations of available coins
-* fixed a few bugs
