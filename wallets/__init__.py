@@ -79,26 +79,78 @@ def register(app, cache=None):
         newkey = ucoin.settings['gpg'].gen_key(__input)
         return jsonify(result="Your new key (%s) has been successfully created." % newkey.fingerprint)
 
-    def get_transactions(pgp_fingerprint, fct, key_prefix):
+    def get_transactions(pgp_fingerprint, fct, key_prefix, begin=None, end=None):
         k = '%s_transactions_%s' % (key_prefix, pgp_fingerprint)
         v = cache.get(k)
         if v is None:
-            v = [item['value']['transaction'] for item in fct(pgp_fingerprint).get()]
+            v = list(fct(pgp_fingerprint, begin=begin, end=end).get())
+            v.sort(key=lambda x: x['value']['transaction']['sigDate'], reverse=True)
             cache.set(k, v, timeout=5*60)
         return v
 
+    from math import ceil
+
+    class Pagination(object):
+
+        def __init__(self, page, per_page, total_count):
+            self.page = page
+            self.per_page = per_page
+            self.total_count = total_count
+
+        @property
+        def pages(self):
+            return int(ceil(self.total_count / float(self.per_page)))
+
+        @property
+        def has_prev(self):
+            return self.page > 1
+
+        @property
+        def has_next(self):
+            return self.page < self.pages
+
+        def iter_pages(self, left_edge=2, left_current=2,
+                       right_current=5, right_edge=2):
+            last = 0
+            for num in range(1, self.pages + 1):
+                if num <= left_edge or \
+                   (num > self.page - left_current - 1 and \
+                    num < self.page + right_current) or \
+                   num > self.pages - right_edge:
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
+    PER_PAGE = 10
+
+    def url_for_other_page(page):
+        args = request.view_args.copy()
+        args['page'] = page
+        return url_for(request.endpoint, **args)
+    app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+
     @app.route('/wallets/<pgp_fingerprint>/history')
     @app.route('/wallets/<pgp_fingerprint>/history/<type>')
-    def wallet_history(pgp_fingerprint, type='all'):
+    @app.route('/wallets/<pgp_fingerprint>/history/page/<int:page>')
+    @app.route('/wallets/<pgp_fingerprint>/history/<type>/page/<int:page>')
+    def wallet_history(pgp_fingerprint, type='all', page=1):
         recipient = get_transactions(pgp_fingerprint, ucoin.hdc.transactions.Recipient, 'recipient')
         sender = get_transactions(pgp_fingerprint, ucoin.hdc.transactions.Sender, 'sender')
+        count = max(len(recipient), len(sender))
+
+        begin = (page-1)*PER_PAGE
+        end = begin+(PER_PAGE-1)
+
+        pagination = Pagination(page, PER_PAGE, count)
 
         return render_template('wallets/history.html',
                                settings=ucoin.settings,
                                key=ucoin.settings['secret_keys'].get(pgp_fingerprint),
-                               recipient=recipient,
-                               sender=sender,
-                               type=type,
+                               recipient=recipient[begin:end],
+                               sender=sender[begin:end],
+                               pagination=pagination,
+                               type=type, page=page,
                                clist=ucoin.wrappers.CoinsList(pgp_fingerprint)())
 
     @app.route('/wallets/<pgp_fingerprint>/history/refresh')

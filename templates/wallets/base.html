@@ -46,6 +46,8 @@
 	  {% if key -%}
             '{{ url_for('wallet_history', pgp_fingerprint=key.fingerprint) }}': 'history',
             '{{ url_for('wallet_history', pgp_fingerprint=key.fingerprint, type=type) }}': 'history',
+            '{{ url_for('wallet_history', pgp_fingerprint=key.fingerprint, page=page) }}': 'history',
+            '{{ url_for('wallet_history', pgp_fingerprint=key.fingerprint, type=type, page=page) }}': 'history',
             '{{ url_for('wallet_transfer', pgp_fingerprint=key.fingerprint) }}': 'transfer',
             '{{ url_for('wallet_issuance', pgp_fingerprint=key.fingerprint) }}': 'issuance',
 	  {% endif -%}

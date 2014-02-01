@@ -1,5 +1,31 @@
 {% extends "wallets/base.html" %}
 
+{% macro render_pagination(pagination) %}
+  <div class="text-center">
+    <ul class="pagination">
+      {% if pagination.has_prev %}
+	<li><a href="{{ url_for_other_page(pagination.page - 1) }}">«</a></li>
+      {% else %}
+	<li class="disabled"><a>«</a></li>
+      {% endif %}
+
+      {%- for page in pagination.iter_pages() %}
+	{% if page == pagination.page %}
+	  <li class="active"><a>{{ page }}</a></li>
+	{% else %}
+	  <li><a href="{{ url_for_other_page(page) }}">{{ page }}</a></li>
+	{% endif %}
+      {%- endfor %}
+
+      {% if pagination.has_next %}
+	<li><a href="{{ url_for_other_page(pagination.page + 1) }}">»</a></li>
+      {% else %}
+	<li class="disabled"><a>»</a></li>
+      {% endif %}
+    </ul>
+  </div>
+{% endmacro %}
+
 {% block sub_content %}
 <h1><span class="label label-default">History</span> <span class="label label-primary">{{key.uids.0|truncate(50)}}</span></h1>
 
@@ -45,7 +71,8 @@
       </tr>
     </thead>
     <tbody>
-      {% for tx in data|sort(attribute='sigDate')|reverse -%}
+      {% for item in data -%}
+	{% set tx=item.value.transaction -%}
 	{% if type == "all" or tx.type|lower == type|lower -%}
 	  <tr class="row1 {% if tx.type == 'TRANSFER' %}active{% elif tx.type == 'ISSUANCE' %}success{% elif tx.type == 'FUSION' %}warning{% else %}danger{% endif %}">
 
@@ -86,5 +113,7 @@
     </tbody>
   </table>
 {% endfor -%}
+
+{{ render_pagination(pagination) }}
 
 {% endblock %}
