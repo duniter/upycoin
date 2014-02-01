@@ -155,11 +155,13 @@ def register(app, cache=None):
 
     @app.route('/wallets/<pgp_fingerprint>/history/refresh')
     @app.route('/wallets/<pgp_fingerprint>/history/refresh/<type>')
-    def wallet_history_refresh(pgp_fingerprint, type='all'):
+    @app.route('/wallets/<pgp_fingerprint>/history/refresh/page/<int:page>')
+    @app.route('/wallets/<pgp_fingerprint>/history/refresh/<type>/page/<int:page>')
+    def wallet_history_refresh(pgp_fingerprint, type='all', page=1):
         k = 'sender_transactions_%s' % pgp_fingerprint; cache.set(k, None)
         k = 'recipient_transactions_%s' % pgp_fingerprint; cache.set(k, None)
         flash(u'History refreshed', 'info')
-        return redirect(url_for('wallet_history', pgp_fingerprint=pgp_fingerprint, type=type))
+        return redirect(url_for('wallet_history', pgp_fingerprint=pgp_fingerprint, type=type, page=page))
 
     @app.route('/wallets/<pgp_fingerprint>/transfer', methods=['GET', 'POST'])
     def wallet_transfer(pgp_fingerprint):
